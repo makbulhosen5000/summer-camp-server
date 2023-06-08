@@ -28,10 +28,15 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     // Send a ping to confirm a successful connection
-      const summerCollection = client.db("summerCamp").collection('popularClasses');
+      const popularClassCollection = client.db("summerCamp").collection('popularClasses');
+      const popularInstructorCollection = client.db("summerCamp").collection('popularInstructors');
     
     app.get('/popular-classes',async(req,res)=>{
-      const result = await summerCollection.find().toArray();
+      const result = await popularClassCollection.find().toArray();
+      res.send(result);
+    })
+    app.get('/popular-instructor',async(req,res)=>{
+      const result = await popularInstructorCollection.find().toArray();
       res.send(result);
     })
 
