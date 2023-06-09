@@ -30,6 +30,7 @@ async function run() {
     // Send a ping to confirm a successful connection
       const popularClassCollection = client.db("summerCamp").collection('popularClasses');
       const popularInstructorCollection = client.db("summerCamp").collection('popularInstructors');
+      const yogaClassCollection = client.db("summerCamp").collection('yoga-classes');
     
     app.get('/popular-classes',async(req,res)=>{
       const result = await popularClassCollection.find().toArray();
@@ -37,6 +38,10 @@ async function run() {
     })
     app.get('/popular-instructor',async(req,res)=>{
       const result = await popularInstructorCollection.find().toArray();
+      res.send(result);
+    })
+    app.get('/yoga-classes',async(req,res)=>{
+      const result = await yogaClassCollection.find().toArray();
       res.send(result);
     })
 
