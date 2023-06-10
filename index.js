@@ -31,6 +31,7 @@ async function run() {
       const popularClassCollection = client.db("summerCamp").collection('popularClasses');
       const popularInstructorCollection = client.db("summerCamp").collection('popularInstructors');
       const yogaClassCollection = client.db("summerCamp").collection('yoga-classes');
+      const userCollection = client.db("summerCamp").collection('users');
     
     app.get('/popular-classes',async(req,res)=>{
       const result = await popularClassCollection.find().toArray();
@@ -42,6 +43,18 @@ async function run() {
     })
     app.get('/yoga-classes',async(req,res)=>{
       const result = await yogaClassCollection.find().toArray();
+      res.send(result);
+    })
+
+    //user create api
+       app.post('/users',async(req,res)=>{
+      const user = req.body;
+      const query = {email: user.email}
+      const existingUser = await userCollection.findOne(query);
+      if(existingUser){
+        return res.send({message:"user already exist"})
+      }
+      const result = await userCollection.insertOne(user);
       res.send(result);
     })
 
