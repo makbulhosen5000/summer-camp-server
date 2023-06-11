@@ -32,12 +32,13 @@ async function run() {
       const popularInstructorCollection = client.db("summerCamp").collection('popularInstructors');
       const yogaClassCollection = client.db("summerCamp").collection('yoga-classes');
       const userCollection = client.db("summerCamp").collection('users');
+      const cartCollection = client.db("summerCamp").collection('carts');
     
     app.get('/popular-classes',async(req,res)=>{
       const result = await popularClassCollection.find().toArray();
       res.send(result);
     })
-    app.get('/popular-instructor',async(req,res)=>{
+    app.get('/popular-instructors',async(req,res)=>{
       const result = await popularInstructorCollection.find().toArray();
       res.send(result);
     })
@@ -46,8 +47,8 @@ async function run() {
       res.send(result);
     })
 
-    //user create api
-       app.post('/users',async(req,res)=>{
+   // user create api
+      app.post('/users',async(req,res)=>{
       const user = req.body;
       const query = {email: user.email}
       const existingUser = await userCollection.findOne(query);
@@ -55,6 +56,12 @@ async function run() {
         return res.send({message:"user already exist"})
       }
       const result = await userCollection.insertOne(user);
+      res.send(result);
+    })
+    //cart related api
+    app.post('/carts', async(req,res)=>{
+      const item = req.body;
+      const result = await cartCollection.insertOne(item);
       res.send(result);
     })
 
