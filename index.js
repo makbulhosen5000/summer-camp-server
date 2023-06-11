@@ -51,7 +51,7 @@ async function run() {
       app.post('/users',async(req,res)=>{
       const user = req.body;
       const query = {email: user.email}
-      const existingUser = await userCollection.findOne(query);
+      const existingUser = await userCollection.find(query);
       if(existingUser){
         return res.send({message:"user already exist"})
       }
@@ -59,6 +59,10 @@ async function run() {
       res.send(result);
     })
     //cart related api
+     app.get('/carts', async(req,res)=>{
+      const result = await cartCollection.find().toArray();
+      res.send(result);
+    })
     app.post('/carts', async(req,res)=>{
       const item = req.body;
       const result = await cartCollection.insertOne(item);
