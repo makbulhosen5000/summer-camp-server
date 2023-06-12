@@ -1,10 +1,10 @@
 const express = require('express')
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 const cors = require('cors');
 require('dotenv').config()
+const stripe = require("stripe")(process.env.PAYMENT_SECRET_KEY);
 const port = process.env.PORT||5000
-
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 // middleware
 app.use(cors())
 app.use(express.json())
@@ -33,6 +33,7 @@ async function run() {
       const yogaClassCollection = client.db("summerCamp").collection('yoga-classes');
       const userCollection = client.db("summerCamp").collection('users');
       const cartCollection = client.db("summerCamp").collection('carts');
+      const paymentCollection = client.db("summerCamp").collection('payments');
     
     app.get('/popular-classes',async(req,res)=>{
       const result = await popularClassCollection.find().toArray();
@@ -75,6 +76,27 @@ async function run() {
       const query = {_id : new ObjectId(id)}
       const result = await cartCollection.deleteOne(query);
       res.send(result);
+    })
+
+    // payment method api
+     //create-payment-intent
+    app.post('/create-payment-intent',async(req,res)=>{
+      const {price} = req.body;
+      const amount = parseInt(price*100);
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount : amount,
+        currency: "usd",
+        payment_method_types:['card']
+
+      });
+      res.send({clientSecret: paymentIntent.client_secret});
+    })
+    app.post('/payments', async(req,res)=>{
+      const payment = req.body;
+      const insertResult = await paymentCollection.insertOne(payment);
+      const query = {_id: {$in:payment.cartItems.map(id => new ObjectId(id))}}
+      const deleteResult = await cartCollection.deleteMany(query);
+      res.send({insertResult,deleteResult});
     })
 
     await client.db("admin").command({ ping: 1 });
