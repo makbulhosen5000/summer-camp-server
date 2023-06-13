@@ -11,6 +11,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 app.use(cors())
 app.use(express.json())
 
+
 const verifyJWT = (req,res,next) =>{
     const authorization = req.headers.authorization;
 
@@ -25,7 +26,6 @@ const verifyJWT = (req,res,next) =>{
         return res.status(401).send({error:true, message:"unauthorized access"})
       }
       req.decoded = decoded;
-      console.log(decoded);
       next();
     })
 }
@@ -65,6 +65,14 @@ async function run() {
      //user related api
     app.get('/users',async(req,res)=>{
       const result = await userCollection.find().toArray();
+      res.send(result);
+    })
+
+    //for delete user
+      app.delete('/users/:id',async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const result = await userCollection.deleteOne(query);
       res.send(result);
     })
     //checking user is admin or not
@@ -116,7 +124,6 @@ async function run() {
         return res.send({message:"user already exist"})
       }
       const result = await userCollection.insertOne(user);
-      console.log(result);
       res.send(result);
     })
     
@@ -182,7 +189,7 @@ async function run() {
       const payment = req.body;
       const insertResult = await paymentCollection.insertOne(payment);
       const query = {_id: {$in:payment.cartItems.map(id => new ObjectId(id))}}
-      const deleteResult = await cartCollection.deleteMany(query);
+      const deleteResult = await cartCollection.deleteOne(query);
       res.send({insertResult,deleteResult});
     })
 
