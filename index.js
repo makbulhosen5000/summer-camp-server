@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 require('dotenv').config()
 const stripe = require("stripe")(process.env.PAYMENT_SECRET_KEY);
 const port = process.env.PORT||5000
@@ -35,6 +36,9 @@ async function run() {
       const cartCollection = client.db("summerCamp").collection('carts');
       const paymentCollection = client.db("summerCamp").collection('payments');
     
+      
+
+
     app.get('/popular-classes',async(req,res)=>{
       const result = await popularClassCollection.find().toArray();
       res.send(result);
@@ -48,17 +52,53 @@ async function run() {
       res.send(result);
     })
 
+     //user related api
+    app.get('/users',async(req,res)=>{
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    })
+    
+    //user update for making Admin
+      app.patch('/users/admin/:id',async(req,res)=>{
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)};
+         const updateDoc = {
+      $set: {
+        role:'admin'
+      },
+    };
+    const result = await userCollection.updateOne(filter, updateDoc);
+    res.send(result);
+    })
+    //user update for making Instructor
+      app.patch('/users/instructor/:id',async(req,res)=>{
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)};
+         const updateDoc = {
+      $set: {
+        role:'instructor'
+      },
+    };
+    const result = await userCollection.updateOne(filter, updateDoc);
+    res.send(result);
+    })
+
    // user create api
       app.post('/users',async(req,res)=>{
       const user = req.body;
+      console.log(user)
       const query = {email: user.email}
-      const existingUser = await userCollection.find(query);
+      const existingUser = await userCollection.findOne(query);
+      console.log(existingUser)
       if(existingUser){
         return res.send({message:"user already exist"})
       }
       const result = await userCollection.insertOne(user);
+      console.log(result);
       res.send(result);
     })
+
+
     //cart related api
      app.get('/carts', async(req,res)=>{
       const result = await cartCollection.find().toArray();
@@ -98,6 +138,8 @@ async function run() {
       const deleteResult = await cartCollection.deleteMany(query);
       res.send({insertResult,deleteResult});
     })
+
+    //user payment history
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
