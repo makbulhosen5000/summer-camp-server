@@ -152,6 +152,7 @@ async function run() {
       res.send(result);
     })
     app.get('/yoga-classes',async(req,res)=>{
+      
       const result = await yogaClassCollection.find().toArray();
       res.send(result);
     })
