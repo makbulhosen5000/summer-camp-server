@@ -101,7 +101,22 @@ async function run() {
     };
     const result = await userCollection.updateOne(filter, updateDoc);
     res.send(result);
+      })
+    //checking user is instructor or not
+    //security layer: verifyJWT
+    //email same
+    //check instructor
+      app.get('/users/instructor/:email',verifyJWT,async(req,res)=>{
+      const email = req.params.email;
+      const query = {email:email}
+      if(req.decoded.email !== email){
+        res.send({instructor:false})
+      }
+      const user =  await userCollection.findOne(query);
+      const result = {instructor:user?.role === 'instructor'}
+      res.send(result);
     })
+
     //user update for making Instructor
       app.patch('/users/instructor/:id',async(req,res)=>{
       const id = req.params.id;
@@ -140,7 +155,20 @@ async function run() {
       const result = await yogaClassCollection.find().toArray();
       res.send(result);
     })
-
+    
+    // yoga-class store api
+    app.post('/yoga-classes', async(req,res)=>{
+    const item = req.body;
+      const result = await yogaClassCollection.insertOne(item);
+      res.send(result);
+    })
+     //for delete yoga students
+    app.delete('/yoga-classes/:id',async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const result = await yogaClassCollection.deleteOne(query);
+      res.send(result);
+    })
 
     //cart related api
      //cart collection api
